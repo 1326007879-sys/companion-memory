@@ -39,6 +39,7 @@ export function mapSessionEvent(
 ): ColdRecord | undefined {
   if (!Number.isSafeInteger(event.seq) || !Number.isSafeInteger(event.time)) return undefined;
   if (!Number.isSafeInteger(session.firstLiveSeq)) return undefined;
+  if (event.ignorable === true) return undefined;
   if (event.seq < session.firstLiveSeq) return undefined;
   if (event.sourceEventSeqs !== undefined || event.surfaceOp !== 'append') return undefined;
   if (!session.id) return undefined;

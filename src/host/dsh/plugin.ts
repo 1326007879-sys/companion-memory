@@ -234,7 +234,9 @@ function applyPlugin(ctx: DshContext, config: Config): void {
         child.on('session/event', (session: DshSession, event: DshSessionEvent) => {
           if (bindings.isBlocked(session.id) || !bindings.get(session.id)) return;
           const record = mapSessionEvent(session, event);
-          if (!record || !isLongTermSourceAllowed(record)) return;
+          // Admission metadata is not exposed by the host yet; an empty meta keeps
+          // unverified tool output out while user/assistant messages still flow in.
+          if (!record || !isLongTermSourceAllowed(record, {})) return;
           void store.appendCold(record).catch(() => undefined);
           scheduler.markExchange(event.time);
         });
