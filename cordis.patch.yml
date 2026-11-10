@@ -1,0 +1,16 @@
+# Each profile loads its own plugin instance; data lives outside the profile directory.
+- insert:
+    - id: companion-memory
+      name: dsh-companion-memory
+      disabled: !!js "!ctx.get('profileContext')"
+      config:
+        memoryRoot: ""          # empty = ~/.companion
+        companionId: default
+        idleReviewSeconds: 15
+        reviewMaxDelaySeconds: 60
+        candidateBudget: 24
+        contextTokens: 800
+        minimumScore: 0.05
+        maxLines: 200
+        maxBytes: 25600
+        maintenanceMode: auto
