@@ -1,4 +1,4 @@
-# dsh-companion-memory (v0 skeleton)
+# dsh-companion-memory-core (v0 skeleton)
 
 Local, host-independent long-term memory core for DeepSeek Harness. Plain-text
 notes, a bounded index, auditable evidence. No runtime dependencies, no external

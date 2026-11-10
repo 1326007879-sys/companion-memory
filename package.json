@@ -1,5 +1,5 @@
 {
-  "name": "dsh-companion-memory",
+  "name": "dsh-companion-memory-core",
   "version": "0.1.0",
   "description": "Local, host-independent long-term memory core for DeepSeek Harness: plain-text notes, a bounded index, and auditable evidence.",
   "type": "module",
