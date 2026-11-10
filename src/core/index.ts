@@ -21,3 +21,4 @@ export {
   disabledLlm, isBudgetError,
   type LlmAdapter, type LlmRequest, type LlmResult,
 } from './llm-adapter.js';
+export { LlmReviewer, type LlmReviewerOptions } from './llm-reviewer.js';

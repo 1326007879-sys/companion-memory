@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
-  buildKeywordIndex, estimateTokens, MemoryStore, NoopReviewer, rawPage, recall,
+  buildKeywordIndex, estimateTokens, LlmReviewer, MemoryStore, rawPage, recall,
   resolveStoreRoot, storePaths, summaryItems,
   type LlmAdapter, type NoteFrontmatter, type NoteType, type RecallItem,
   type Reviewer, type StoredNote,
@@ -25,6 +25,25 @@ export interface Config {
   contextTokens?: number;
   minimumScore?: number;
   maintenanceMode?: 'off' | 'preview' | 'auto';
+  /** Empty = borrow the model route of the current session request header. */
+  reviewProvider?: string;
+  reviewModel?: string;
+}
+
+interface HostAgent {
+  id: string;
+  ctx: DshContext;
+  session?: {
+    requestHeader?: () => { config?: { provider?: string; model?: string } } | undefined;
+  };
+}
+
+/** Host auxiliary producers (e.g. auto-review) read the route from here. */
+function modelRoute(agent?: HostAgent): { provider: string; model: string } | undefined {
+  const config = agent?.session?.requestHeader?.()?.config;
+  return config?.provider && config.model
+    ? { provider: config.provider, model: config.model }
+    : undefined;
 }
 
 export interface PluginRuntime {
@@ -192,8 +211,17 @@ function applyPlugin(ctx: DshContext, config: Config): void {
   const paths = storePaths(resolveStoreRoot(config.memoryRoot));
   const store = new MemoryStore(paths);
   const companionId = config.companionId ?? 'default';
-  const adapter = createDshLlmAdapter(ctx);
-  const reviewer: Reviewer = new NoopReviewer();
+  let currentAgent: HostAgent | undefined;
+  const adapter = createDshLlmAdapter(ctx, {
+    provider: config.reviewProvider,
+    model: config.reviewModel,
+    route: () => modelRoute(currentAgent),
+  });
+  const reviewer: Reviewer = new LlmReviewer(store, adapter, {
+    companionId,
+    candidateBudget: config.candidateBudget,
+    contextTokens: config.contextTokens,
+  });
   let snapshot = '';
 
   const refresh = async (): Promise<void> => {
@@ -212,17 +240,15 @@ function applyPlugin(ctx: DshContext, config: Config): void {
     maxDelaySeconds: config.reviewMaxDelaySeconds ?? 60,
     onDue: async () => {
       if ((config.maintenanceMode ?? 'off') === 'off') return;
-      const result = await reviewer.review({
-        companionId, coldIds: [], system: '', candidateSummaries: [],
-      });
-      if (result.indexLines.length > 0) await store.writeIndex(result.indexLines);
+      await reviewer.review({ companionId, coldIds: [], system: '', candidateSummaries: [] });
       await refresh();
     },
   });
 
   void store.ensure(companionId).then(refresh);
 
-  ctx.on('agent/created', ({ agent }: { agent: { id: string; ctx: DshContext } }) => {
+  ctx.on('agent/created', ({ agent }: { agent: HostAgent }) => {
+    currentAgent = agent;
     const bindings = new SessionBindings([{
       hostSessionId: agent.id, companionId, logicalChatId: agent.id,
     }]);

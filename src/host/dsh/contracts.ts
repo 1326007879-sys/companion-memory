@@ -46,6 +46,20 @@ export interface PromptSpec {
   interpolate: boolean;
 }
 
+/** Token-level chunks from `ctx.llm.stream()`; the last one is always `finish`. */
+export interface DshLlmStreamChunk {
+  type?: string;
+  text?: string;
+  delta?: string;
+  reason?: { kind?: string; failure?: { code?: string; message?: string } };
+}
+
+/** The only supported path into the host's provider adapters (`dsh-llm` README). */
+export interface DshLlmService {
+  stream(options: Record<string, unknown>): AsyncIterable<DshLlmStreamChunk>;
+  listProviders?(): Array<{ id: string }>;
+}
+
 export interface DshContext {
   on(event: string, handler: (...args: any[]) => unknown): () => void;
   /** `agent/created` is dispatched as a serial lifecycle event. */
@@ -57,5 +71,5 @@ export interface DshContext {
   plugin?(descriptor: { name: string; apply: (ctx: DshContext) => void }): void;
   systemPrompt?: { context(spec: PromptSpec): void };
   tools?: { register(spec: ToolSpec): void };
-  llm?: { stream?: unknown };
+  llm?: DshLlmService;
 }

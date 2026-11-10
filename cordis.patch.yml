@@ -13,4 +13,6 @@
         minimumScore: 0.05
         maxLines: 200
         maxBytes: 25600
+        reviewProvider: ""      # empty = current session request-header route
+        reviewModel: ""
         maintenanceMode: off

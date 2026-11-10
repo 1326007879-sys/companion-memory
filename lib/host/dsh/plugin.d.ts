@@ -11,6 +11,9 @@ export interface Config {
     contextTokens?: number;
     minimumScore?: number;
     maintenanceMode?: 'off' | 'preview' | 'auto';
+    /** Empty = borrow the model route of the current session request header. */
+    reviewProvider?: string;
+    reviewModel?: string;
 }
 export interface PluginRuntime {
     store: MemoryStore;

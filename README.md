@@ -10,11 +10,14 @@ Design notes live in the project plan and are not shipped in the npm package.
 
 This is the **v0 skeleton**: package layout, configuration, data contract, store
 initialization, indexing and recall primitives are in place. `lib/` is generated
-by `npm run build` and shipped in the package. Not yet wired:
+by `npm run build` and shipped in the package.
 
-- LLM-backed review (disabled by default via `maintenanceMode: off`; the reviewer
-  is still a no-op until it is wired to the host model)
-- the real host `llm/stream` adapter and the sidebar panel slots
+Review now borrows the host's `ctx.llm.stream()` through `LlmReviewer`; it stays
+disabled by default via `maintenanceMode: off` until local verification passes.
+Not yet wired:
+
+- the sidebar panel slot (`client/panel.ts` is still a placeholder)
+- host admission metadata (unverified `tool/result` stays out)
 
 Nothing here is published to npm yet.
 

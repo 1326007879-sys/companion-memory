@@ -7,3 +7,4 @@ export { recall, RECALL_WEIGHTS, ZONE_WEIGHTS, type RecallItem, type RecallHit, 
 export { estimateTokens, summaryItems, rawPage, type SummaryItem, type DisclosureCandidate } from './disclosure.js';
 export { operationId, ReviewTiming, NoopReviewer, type ReviewRequest, type ReviewResult, type ReviewNote, type Reviewer, } from './review.js';
 export { disabledLlm, isBudgetError, type LlmAdapter, type LlmRequest, type LlmResult, } from './llm-adapter.js';
+export { LlmReviewer, type LlmReviewerOptions } from './llm-reviewer.js';
