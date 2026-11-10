@@ -211,7 +211,7 @@ function applyPlugin(ctx: DshContext, config: Config): void {
     idleSeconds: config.idleReviewSeconds ?? 15,
     maxDelaySeconds: config.reviewMaxDelaySeconds ?? 60,
     onDue: async () => {
-      if ((config.maintenanceMode ?? 'auto') === 'off') return;
+      if ((config.maintenanceMode ?? 'off') === 'off') return;
       const result = await reviewer.review({
         companionId, coldIds: [], system: '', candidateSummaries: [],
       });

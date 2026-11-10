@@ -12,7 +12,8 @@ This is the **v0 skeleton**: package layout, configuration, data contract, store
 initialization, indexing and recall primitives are in place. `lib/` is generated
 by `npm run build` and shipped in the package. Not yet wired:
 
-- LLM-backed review (`maintenanceMode: auto` currently uses a no-op reviewer)
+- LLM-backed review (disabled by default via `maintenanceMode: off`; the reviewer
+  is still a no-op until it is wired to the host model)
 - the real host `llm/stream` adapter and the sidebar panel slots
 
 Nothing here is published to npm yet.
@@ -40,8 +41,9 @@ Local verification should use a dedicated `test` profile, never the daily one.
 
 ## Data location
 
-Default `~/.companion/`, overridable with `config.memoryRoot`. Everything is
-plain text and stays on the machine:
+Default `~/.companion/`, overridable with `config.memoryRoot` or the
+`COMPANION_MEMORY_ROOT` environment variable. Everything is plain text and
+stays on the machine:
 
 ```
 MEMORY.md          bounded index (200 lines / 25 KB)

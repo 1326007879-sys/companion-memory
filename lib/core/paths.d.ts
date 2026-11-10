@@ -12,6 +12,6 @@ export interface StorePaths {
     profile: string;
     state: string;
 }
-/** Empty or unset config means one canonical store outside the dsh profile dir. */
+/** Explicit config wins, then the environment override, then ~/.companion. */
 export declare function resolveStoreRoot(configured?: string): string;
 export declare function storePaths(root?: string): StorePaths;

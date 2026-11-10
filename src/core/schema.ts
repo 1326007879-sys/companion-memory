@@ -60,7 +60,7 @@ export function createEmptyMeta(companionId = 'default'): Meta {
     lastProcessedSeq: 0,
     lastReviewAt: 0,
     indexFingerprint: '',
-    maintenanceMode: 'auto',
+    maintenanceMode: 'off',
   };
 }
 

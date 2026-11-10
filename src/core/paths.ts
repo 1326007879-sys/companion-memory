@@ -16,11 +16,15 @@ export interface StorePaths {
   state: string;
 }
 
-/** Empty or unset config means one canonical store outside the dsh profile dir. */
+/** Explicit config wins, then the environment override, then ~/.companion. */
 export function resolveStoreRoot(configured?: string): string {
   const raw = configured?.trim();
-  if (!raw) return join(homedir(), '.companion');
-  return isAbsolute(raw) ? raw : resolve(raw);
+  if (raw) return isAbsolute(raw) ? raw : resolve(raw);
+  const fromEnv = typeof process !== 'undefined'
+    ? process.env.COMPANION_MEMORY_ROOT?.trim()
+    : undefined;
+  if (fromEnv) return isAbsolute(fromEnv) ? fromEnv : resolve(fromEnv);
+  return join(homedir(), '.companion');
 }
 
 export function storePaths(root: string = resolveStoreRoot()): StorePaths {
