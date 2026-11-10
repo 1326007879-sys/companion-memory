@@ -35,6 +35,11 @@ function operationMarker(body: string): string | undefined {
   return /<!-- op: ([a-f0-9]+) -->/.exec(body)?.[1];
 }
 
+/** Whitespace/case-tolerant containment so verbatim quotes survive line wrapping. */
+function normalizeQuote(text: string): string {
+  return text.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
 function parseNotes(text: string): ReviewNote[] {
   const start = text.indexOf('{');
   const end = text.lastIndexOf('}');
@@ -86,15 +91,18 @@ export class LlmReviewer implements Reviewer {
 
     const budget = this.options.contextTokens ?? 800;
     const lines: string[] = [];
-    let used = 0;
+    const usedCandidates: ColdCandidate[] = [];
+    let spent = 0;
     for (const item of batch) {
       const line = `[${item.role}] ${item.content.slice(0, 800)}`;
       const cost = estimateTokens(line);
-      if (used + cost > budget) break;
+      if (spent + cost > budget) break;
       lines.push(line);
-      used += cost;
+      usedCandidates.push(item);
+      spent += cost;
     }
     if (lines.length === 0) return empty;
+    const haystack = normalizeQuote(lines.join('\n'));
 
     let answer: string;
     try {
@@ -119,6 +127,18 @@ export class LlmReviewer implements Reviewer {
     const today = new Date().toISOString().slice(0, 10);
 
     for (const note of parsed) {
+      // Verbatim gate: an evidence quote the model was never shown (or garbled)
+      // must never reach disk.
+      const evidenceNorm = normalizeQuote(note.evidence);
+      if (!haystack.includes(evidenceNorm)) continue;
+      const sourceRefs = usedCandidates
+        .filter((item) => normalizeQuote(`[${item.role}] ${item.content.slice(0, 800)}`)
+          .includes(evidenceNorm))
+        .map((item) => item.id)
+        .slice(0, 4);
+      // A quote spanning two adjacent lines still passes the haystack check;
+      // attribute it to the batch window instead of inventing a source.
+      if (sourceRefs.length === 0) sourceRefs.push(usedCandidates[0].id);
       const payloadHash = createHash('sha256').update(JSON.stringify(note)).digest('hex');
       const opId = operationId(companionId, batch[0].id, batch[0].seq, payloadHash);
       if (seen.has(opId)) continue;
@@ -130,7 +150,7 @@ export class LlmReviewer implements Reviewer {
         created: today,
         updated: today,
         evidence: note.evidence,
-        sourceRefs: batch.slice(0, 4).map((item) => item.id),
+        sourceRefs,
         supersededBy: null,
         confidence: 0.7,
         strength: 0.6,

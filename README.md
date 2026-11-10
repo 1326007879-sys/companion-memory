@@ -21,6 +21,13 @@ through the host's slot service; note browsing stays on the tool surface. A
 custom pane is deferred: host remote namespaces are Typert-generated, so a
 third-party plugin cannot register a new RPC group at runtime.
 
+When consolidation runs, the model route is borrowed from the current session
+request header. Set `reviewProvider` / `reviewModel` in the profile config to
+pin a specific one; leaving both empty follows whatever the conversation uses.
+Every written note carries an `evidence` quote that is verified verbatim
+against the input actually shown to the model — fabricated quotes are dropped
+before they reach disk.
+
 The host exposes no `learning` / `contentMode` / `toolVerified` admission
 metadata, so unverified `tool/result` output is deliberately never archived.
 User and assistant messages are the only long-term sources in v0.
