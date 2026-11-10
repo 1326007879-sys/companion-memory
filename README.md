@@ -14,9 +14,12 @@ by `npm run build` and shipped in the package.
 
 Review now borrows the host's `ctx.llm.stream()` through `LlmReviewer`; it stays
 disabled by default via `maintenanceMode: off` until local verification passes.
+The client entry (`exports["./client"]`) registers a read-only sidebar action
+through the host's slot service; note browsing stays on the tool surface. A
+custom pane with its own React component and remote RPC group is deferred.
+
 Not yet wired:
 
-- the sidebar panel slot (`client/panel.ts` is still a placeholder)
 - host admission metadata (unverified `tool/result` stays out)
 
 Nothing here is published to npm yet.

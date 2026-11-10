@@ -15,6 +15,10 @@
       "types": "./lib/core/index.d.ts",
       "import": "./lib/core/index.js"
     },
+    "./client": {
+      "types": "./lib/client/index.d.ts",
+      "default": "./lib/client/index.js"
+    },
     "./package.json": "./package.json",
     "./cordis.patch.yml": "./cordis.patch.yml"
   },
