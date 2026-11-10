@@ -66,9 +66,11 @@ export function recall(
         + RECALL_WEIGHTS.strength * item.strength
         + RECALL_WEIGHTS.recency * recency
         + RECALL_WEIGHTS.importance * item.importance;
-      return { item, score: Math.round(score * 10_000) / 10_000 };
+      return { item, rel, score: Math.round(score * 10_000) / 10_000 };
     })
-    .filter((hit) => hit.score >= minScore)
+    // Strength/recency/importance alone must never surface an unrelated memory.
+    .filter((hit) => hit.rel > 0 && hit.score >= minScore)
     .sort((a, b) => b.score - a.score)
-    .slice(0, Math.min(limit, budget));
+    .slice(0, Math.min(limit, budget))
+    .map(({ item, score }) => ({ item, score }));
 }

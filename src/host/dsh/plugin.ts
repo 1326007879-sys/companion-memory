@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
-  buildKeywordIndex, estimateTokens, LlmReviewer, MemoryStore, rawPage, recall,
+  buildIndexSnapshot, buildKeywordIndex, LlmReviewer, MemoryStore, rawPage, recall,
   resolveStoreRoot, storePaths, summaryItems,
   type LlmAdapter, type NoteFrontmatter, type NoteType, type RecallItem,
   type Reviewer, type StoredNote,
@@ -225,13 +225,7 @@ function applyPlugin(ctx: DshContext, config: Config): void {
   let snapshot = '';
 
   const refresh = async (): Promise<void> => {
-    const budget = config.contextTokens ?? 800;
-    const kept: string[] = [];
-    for (const line of await store.readIndex()) {
-      if (estimateTokens([...kept, line]) > budget) break;
-      kept.push(line);
-    }
-    snapshot = kept.join('\n');
+    snapshot = await buildIndexSnapshot(store, config.contextTokens ?? 800);
   };
 
   const deps = createToolDeps(store, config, refresh);
@@ -260,8 +254,8 @@ function applyPlugin(ctx: DshContext, config: Config): void {
         child.on('session/event', (session: DshSession, event: DshSessionEvent) => {
           if (bindings.isBlocked(session.id) || !bindings.get(session.id)) return;
           const record = mapSessionEvent(session, event);
-          // Admission metadata is not exposed by the host yet; an empty meta keeps
-          // unverified tool output out while user/assistant messages still flow in.
+          // The host exposes no admission metadata; the empty meta keeps unverified
+          // tool output out while user/assistant messages still flow in.
           if (!record || !isLongTermSourceAllowed(record, {})) return;
           void store.appendCold(record).catch(() => undefined);
           scheduler.markExchange(event.time);

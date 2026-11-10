@@ -18,9 +18,9 @@ The client entry (`exports["./client"]`) registers a read-only sidebar action
 through the host's slot service; note browsing stays on the tool surface. A
 custom pane with its own React component and remote RPC group is deferred.
 
-Not yet wired:
-
-- host admission metadata (unverified `tool/result` stays out)
+The host exposes no `learning` / `contentMode` / `toolVerified` admission
+metadata, so unverified `tool/result` output is deliberately never archived.
+User and assistant messages are the only long-term sources in v0.
 
 Nothing here is published to npm yet.
 

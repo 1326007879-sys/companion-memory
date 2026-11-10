@@ -8,3 +8,4 @@ export { estimateTokens, summaryItems, rawPage, type SummaryItem, type Disclosur
 export { operationId, ReviewTiming, NoopReviewer, type ReviewRequest, type ReviewResult, type ReviewNote, type Reviewer, } from './review.js';
 export { disabledLlm, isBudgetError, type LlmAdapter, type LlmRequest, type LlmResult, } from './llm-adapter.js';
 export { LlmReviewer, type LlmReviewerOptions } from './llm-reviewer.js';
+export { buildIndexSnapshot } from './context.js';

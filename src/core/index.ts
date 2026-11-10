@@ -22,3 +22,4 @@ export {
   type LlmAdapter, type LlmRequest, type LlmResult,
 } from './llm-adapter.js';
 export { LlmReviewer, type LlmReviewerOptions } from './llm-reviewer.js';
+export { buildIndexSnapshot } from './context.js';
