@@ -25,7 +25,8 @@ The host exposes no `learning` / `contentMode` / `toolVerified` admission
 metadata, so unverified `tool/result` output is deliberately never archived.
 User and assistant messages are the only long-term sources in v0.
 
-Nothing here is published to npm yet.
+The npm package name is `dsh-companion-memory-core`, distinct from the GitHub
+repository name.
 
 ## Layout
 
