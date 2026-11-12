@@ -241,28 +241,31 @@ function applyPlugin(ctx: DshContext, config: Config): void {
 
   void store.ensure(companionId).then(refresh);
 
+  const bindings = new SessionBindings();
+
+  // Host services are ready on the plugin's own ctx (declared via `inject`).
+  // Registering per-agent behaviour through `agent.ctx.plugin()` passed the
+  // protocol tests but silently dropped tools and session events in the desktop
+  // build: the child context never received the host services, and its hooks
+  // were filtered out of the session lifecycle scope.
+  mountPrompt(ctx, () => snapshot);
+  registerTools(ctx, deps);
+  ctx.on('session/event', (session: DshSession, event: DshSessionEvent) => {
+    if (!session?.id || bindings.isBlocked(session.id)) return;
+    // Sessions may appear before (or without) an agent/created edge; register
+    // lazily so collection never depends on lifecycle ordering.
+    if (!bindings.get(session.id)) bindings.register(session.id, companionId, session.id);
+    const record = mapSessionEvent(session, event);
+    // The host exposes no admission metadata; the empty meta keeps unverified
+    // tool output out while user/assistant messages still flow in.
+    if (!record || !isLongTermSourceAllowed(record, {})) return;
+    void store.appendCold(record).catch(() => undefined);
+    scheduler.markExchange(event.time);
+  });
+  ctx.on('agent/pre-step', () => { void refresh(); });
   ctx.on('agent/created', ({ agent }: { agent: HostAgent }) => {
     currentAgent = agent;
-    const bindings = new SessionBindings([{
-      hostSessionId: agent.id, companionId, logicalChatId: agent.id,
-    }]);
-    agent.ctx.plugin?.({
-      name: 'companion-memory-session',
-      apply(child: DshContext) {
-        mountPrompt(child, () => snapshot);
-        registerTools(child, deps);
-        child.on('session/event', (session: DshSession, event: DshSessionEvent) => {
-          if (bindings.isBlocked(session.id) || !bindings.get(session.id)) return;
-          const record = mapSessionEvent(session, event);
-          // The host exposes no admission metadata; the empty meta keeps unverified
-          // tool output out while user/assistant messages still flow in.
-          if (!record || !isLongTermSourceAllowed(record, {})) return;
-          void store.appendCold(record).catch(() => undefined);
-          scheduler.markExchange(event.time);
-        });
-        child.on('agent/pre-step', () => { void refresh(); });
-      },
-    });
+    if (agent?.id) bindings.register(agent.id, companionId, agent.id);
   });
 
   ctx.on('agent/disposed', () => { scheduler.stop(); });

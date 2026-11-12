@@ -18,15 +18,9 @@ test('§7-3 idle review writes one evidenced note and stays idempotent', async (
   await store.ensure();
 
   const handlers = new Map();
-  const childHandlers = new Map();
   let runtime;
   let calls = 0;
 
-  const child = {
-    on(event, fn) { childHandlers.set(event, fn); return () => {}; },
-    systemPrompt: { context() {} },
-    tools: { register() {} },
-  };
   const ctx = {
     on(event, fn) {
       const list = handlers.get(event) ?? [];
@@ -67,9 +61,8 @@ test('§7-3 idle review writes one evidenced note and stays idempotent', async (
       reviewMaxDelaySeconds: 0.2,
     }).apply(ctx);
 
-    const agent = { id: 'sess-1', ctx: { plugin: (descriptor) => descriptor.apply(child) } };
-    handlers.get('agent/created')[0]({ agent });
-    childHandlers.get('session/event')(
+    handlers.get('agent/created')[0]({ agent: { id: 'sess-1' } });
+    handlers.get('session/event')[0](
       { id: 'sess-1', firstLiveSeq: 1 },
       {
         seq: 10,

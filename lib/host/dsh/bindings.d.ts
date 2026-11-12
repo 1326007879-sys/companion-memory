@@ -9,6 +9,8 @@ export declare class SessionBindings {
     private readonly blocked;
     constructor(initial?: readonly SessionBinding[]);
     get(hostSessionId: string): SessionBinding | undefined;
+    /** Idempotent registration for sessions seen before their agent lifecycle edge. */
+    register(hostSessionId: string, companionId: string, logicalChatId: string): void;
     isBlocked(hostSessionId: string): boolean;
     list(): SessionBinding[];
     rotate(oldHostSessionId: string, newHostSessionId: string): SessionBinding | undefined;

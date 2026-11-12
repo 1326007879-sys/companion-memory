@@ -17,6 +17,12 @@ export class SessionBindings {
     return this.live.get(hostSessionId);
   }
 
+  /** Idempotent registration for sessions seen before their agent lifecycle edge. */
+  register(hostSessionId: string, companionId: string, logicalChatId: string): void {
+    if (this.blocked.has(hostSessionId)) return;
+    this.live.set(hostSessionId, { hostSessionId, companionId, logicalChatId });
+  }
+
   isBlocked(hostSessionId: string): boolean {
     return this.blocked.has(hostSessionId);
   }
