@@ -281,11 +281,19 @@ function applyPlugin(ctx: DshContext, config: Config): void {
 export function createCompanionMemoryPlugin(config: Config = {}) {
   return {
     name: 'companion-memory',
+    inject,
     apply: (ctx: DshContext) => applyPlugin(ctx, config),
   };
 }
 
+/**
+ * The host loader reads `inject` from the plugin object / entry options, not
+ * from a module-level named export. Without it, cordis refuses every
+ * `ctx.systemPrompt` / `ctx.tools` / `ctx.llm` access and the entry never
+ * activates.
+ */
 export default {
   name: 'companion-memory',
+  inject,
   apply: (ctx: DshContext) => applyPlugin(ctx, {}),
 };

@@ -25,10 +25,18 @@ export interface PluginRuntime {
 export declare function createToolDeps(store: MemoryStore, config: Config, refresh: () => Promise<void>): ToolDeps;
 export declare function createCompanionMemoryPlugin(config?: Config): {
     name: string;
+    inject: string[];
     apply: (ctx: DshContext) => void;
 };
+/**
+ * The host loader reads `inject` from the plugin object / entry options, not
+ * from a module-level named export. Without it, cordis refuses every
+ * `ctx.systemPrompt` / `ctx.tools` / `ctx.llm` access and the entry never
+ * activates.
+ */
 declare const _default: {
     name: string;
+    inject: string[];
     apply: (ctx: DshContext) => void;
 };
 export default _default;

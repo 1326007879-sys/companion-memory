@@ -2,6 +2,7 @@
 - insert:
     - id: companion-memory
       name: dsh-companion-memory-core
+      inject: [agents, systemPrompt, tools, llm]
       disabled: !!js "!ctx.get('profileContext')"
       config:
         memoryRoot: ""          # empty = ~/.companion

@@ -95,3 +95,12 @@ test('ships no client bundle (the host loads client.js as a classic script)', as
     'no ESM client file may be shipped',
   );
 });
+
+test('declares inject on the plugin object and the bundle entry', async () => {
+  const expected = ['agents', 'systemPrompt', 'tools', 'llm'];
+  const mod = await import('../lib/index.js');
+  assert.deepEqual(mod.default.inject, expected, 'host loader reads inject from the plugin object');
+  assert.deepEqual(mod.createCompanionMemoryPlugin().inject, expected);
+  const patch = await readFile(new URL('../cordis.patch.yml', import.meta.url), 'utf8');
+  assert.match(patch, /inject:\s*\[agents,\s*systemPrompt,\s*tools,\s*llm\]/);
+});
